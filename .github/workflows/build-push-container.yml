@@ -31,4 +31,4 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: bmuschko/app-frontend:latest,bmuschko/app-frontend:${{ SHORT_SHA }}
+          tags: bmuschko/app-frontend:latest,bmuschko/app-frontend:"$SHORT_SHA"

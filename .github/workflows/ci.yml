@@ -14,6 +14,6 @@ jobs:
           node-version: 20.x
           cache: npm
 
-      - name: Install and build
+      - name: Build
         shell: bash
         run: npm ci

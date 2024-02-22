@@ -29,6 +29,9 @@ spec:
               value: "{{workflow.parameters.repo}}"
             - name: branch
               value: "{{workflow.parameters.branch}}"
+      - name: build
+        template: node-build
+        dependencies: [checkout]
 
   - name: git-clone
     inputs:
@@ -50,3 +53,14 @@ spec:
         - --single-branch
         - "{{inputs.parameters.repo}}"
         - .
+
+  - name: node-build
+    container:
+      volumeMounts:
+        - mountPath: /work
+          name: work
+      image: node:21-alpine3.18
+      workingDir: /work
+      args:
+        - npm
+        - ci

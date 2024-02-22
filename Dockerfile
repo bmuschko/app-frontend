@@ -1,4 +1,4 @@
-FROM node:20.11.1-alpine3.19
+FROM node:20.11.1-bullseye-slim
 WORKDIR /app
 COPY ["package.json", "package-lock.json*", "./"]
 RUN npm install --production

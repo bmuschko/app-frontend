@@ -6,6 +6,7 @@ spec:
   arguments:
     parameters:
       - name: repo
+        value: https://github.com/bmuschko/app-frontend
       - name: branch
         value: main
   entrypoint: checkout
@@ -59,7 +60,7 @@ spec:
       volumeMounts:
         - mountPath: /work
           name: work
-      image: node:21-alpine3.18
+      image: node:20.11.1-bullseye-slim
       workingDir: /work
       args:
         - npm

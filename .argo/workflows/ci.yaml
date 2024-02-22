@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: input-artifact-git-
+spec:
+  arguments:
+    parameters:
+      - name: repo
+      - name: branch
+        value: main
+  entrypoint: checkout
+  volumeClaimTemplates:
+    - metadata:
+        name: work
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 64Mi
+  templates:
+  - name: checkout
+    dag:
+      tasks:
+      - name: checkout
+        template: git-clone
+        arguments:
+          parameters:
+            - name: repo
+              value: "{{workflow.parameters.repo}}"
+            - name: branch
+              value: "{{workflow.parameters.branch}}"
+
+  - name: git-clone
+    inputs:
+      parameters:
+        - name: repo
+        - name: branch
+    container:
+      volumeMounts:
+        - mountPath: /work
+          name: work
+      image: alpine/git:v2.43.0
+      workingDir: /work
+      args:
+        - clone
+        - --depth
+        - "1"
+        - --branch
+        - "{{inputs.parameters.branch}}"
+        - --single-branch
+        - "{{inputs.parameters.repo}}"
+        - .

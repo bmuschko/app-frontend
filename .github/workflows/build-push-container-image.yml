@@ -32,4 +32,4 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: bmuschko/app-frontend:latest,bmuschko/app-frontend:${{ env.GITHUB_SHA_SHORT }}
+          tags: bmuschko/app-frontend:${{ env.GITHUB_SHA_SHORT }}

@@ -9,12 +9,14 @@ spec:
         value: https://github.com/bmuschko/app-frontend
       - name: branch
         value: main
+      - name: revision
+        value: HEAD
       - name: path
         value: .
       - name: platforms
         value: linux/amd64,linux/arm64
       - name: image
-        value: bmuschko/app-frontend:latest
+        value: bmuschko/app-frontend
   entrypoint: checkout
   volumeClaimTemplates:
     - metadata:
@@ -36,6 +38,15 @@ spec:
                 value: "{{workflow.parameters.repo}}"
               - name: branch
                 value: "{{workflow.parameters.branch}}"
+
+        - name: get-short-hash
+          template: short-hash
+          arguments:
+            parameters:
+              - name: revision
+                value: "{{ workflow.parameters.revision }}"
+          dependencies: [checkout]
+
         - name: container-image
           template: build-push-container-image
           arguments:
@@ -46,7 +57,9 @@ spec:
                 value: "{{workflow.parameters.platforms}}"
               - name: image
                 value: "{{workflow.parameters.image}}"
-          dependencies: [checkout]
+              - name: hash
+                value: "{{ tasks.get-short-hash.outputs.result }}"
+          dependencies: [get-short-hash]
 
   - name: git-clone
     inputs:
@@ -69,12 +82,29 @@ spec:
         - "{{inputs.parameters.repo}}"
         - .
 
+  - name: short-hash
+    inputs:
+      parameters:
+      - name: revision
+    container:
+      volumeMounts:
+        - mountPath: /work
+          name: work
+      image: alpine/git:v2.43.0
+      workingDir: /work
+      command:
+      - git
+      - rev-parse
+      - --short
+      - "{{ inputs.parameters.revision }}"
+
   - name: build-push-container-image
     inputs:
       parameters:
         - name: path
         - name: platforms
         - name: image
+        - name: hash
     volumes:
       - name: docker-config
         secret:
@@ -108,4 +138,4 @@ spec:
         - --opt
         - platform={{inputs.parameters.platforms}}
         - --output
-        - type=image,name=docker.io/{{inputs.parameters.image}},push=true
+        - type=image,name=docker.io/{{inputs.parameters.image}}:{{inputs.parameters.hash}},push=true
